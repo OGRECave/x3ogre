@@ -15,9 +15,9 @@ There are two declarative APIs available for usage with x3ogre, the declarative 
 * [Ogre Material System Documentation](https://ogrecave.github.io/ogre/api/1.10/Material-Scripts.html)
 
 For more details on x3ogre see
-* [Inherent Limitations](docs/home.md)
-* [Supported X3D Nodes](docs/x3d-nodes.markdown)
-* [System Architecture](docs/system-architecture.markdown)
+* [Inherent Limitations](docs/limitations.md)
+* [Supported X3D Nodes](docs/x3d-nodes.md)
+* [System Architecture](docs/system-architecture.md)
 
 Code Contribution
 -----------------
