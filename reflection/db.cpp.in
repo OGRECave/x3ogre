@@ -1,0 +1,137 @@
+#include "db.h"
+#include "MemberAdapter.h"
+
+#include <map>
+
+
+<<includes>>
+
+using namespace std;
+using namespace X3D;
+
+namespace {
+map<const string, reflection::TypeInfoCommon*> _typeDB;
+map<const std::type_info*, reflection::TypeInfoCommon*> _rttiDB;
+
+template <typename T, class Enable = void>
+struct TypeInfo : public reflection::TypeInfoCommon {
+    TypeInfo(const string& typeName, const string& parentType) : reflection::TypeInfoCommon(parentType) {
+        _typeDB.emplace(typeName, this);
+        _rttiDB.emplace(&typeid(T), this);
+    }
+
+    template <typename M, void (T::*member)(M*)>
+    TypeInfo* addSetter(const string& name) {
+        _setters.emplace(name, new reflection::SetterAdapter<T, M, member>());
+        return this;
+    }
+    
+    template <typename M, void (T::*member)(const M&)>
+    TypeInfo* addSetter(const string& name) {
+        _setters.emplace(name, new reflection::SetterAdapter<T, M, member>());
+        return this;
+    }
+    
+    template <typename M, const M& (T::*member)() const>
+    TypeInfo* addGetter(const string& name) {
+        _getters.emplace(name, new reflection::GetterAdapter<T, M, member>());
+        return this;
+    }
+    
+    reflection::Object* create() {
+        return new T;
+    }
+};
+
+template <typename T>
+struct TypeInfo<T, typename std::enable_if<std::is_abstract<T>::value >::type> : public reflection::TypeInfoCommon {
+    TypeInfo(const string& typeName, const string& parentType) : reflection::TypeInfoCommon(parentType) {
+        _typeDB.emplace(typeName, this);
+        _rttiDB.emplace(&typeid(T), this);
+    }
+
+    template <typename M, void (T::*member)(M*)>
+    TypeInfo* addSetter(const string& name) {
+        _setters.emplace(name, new reflection::SetterAdapter<T, M, member>());
+        return this;
+    }
+    
+    template <typename M, void (T::*member)(const M&)>
+    TypeInfo* addSetter(const string& name) {
+        _setters.emplace(name, new reflection::SetterAdapter<T, M, member>());
+        return this;
+    }
+
+    template <typename M, const M& (T::*member)() const>
+    TypeInfo* addGetter(const string& name) {
+        _getters.emplace(name, new reflection::GetterAdapter<T, M, member>());
+        return this;
+    }
+
+    reflection::Object* create() {
+        return nullptr;
+    }
+};
+
+void initMap() {
+<<constructors>>
+    auto i = _typeDB.begin();
+    for(;i != _typeDB.end(); ++i) {
+        i->second->_resolveParentInfo();
+    }
+}
+
+}
+
+namespace reflection {
+void alias(const std::string& type, const std::string& alias) {
+    if(_typeDB.empty()) {
+        initMap();
+    }
+
+    auto i = _typeDB.find(type);
+
+    if(i == _typeDB.end()) {
+        throw runtime_error("type '"+type+"' is not defined");
+    }
+
+    _typeDB.emplace(alias, i->second);
+}
+
+TypeInfoCommon* getTypeInfo(const string& type) {
+    if(_typeDB.empty()) {
+        initMap();
+    }
+
+    auto i = _typeDB.find(type);
+    return i == _typeDB.end() ? nullptr : i->second;
+}
+
+TypeInfoCommon* getTypeInfo(const reflection::Object& obj) {
+    if(_typeDB.empty()) {
+        initMap();
+    }
+
+    auto i = _rttiDB.find(&typeid(obj));
+    return i == _rttiDB.end() ? nullptr : i->second;
+}
+
+std::string getTypeName(const Object& obj) {
+    if(_typeDB.empty()) {
+        initMap();
+    }
+
+    auto i = _rttiDB.find(&typeid(obj));
+
+    if(i == _rttiDB.end())
+        return "";
+
+    for(const auto& d : _typeDB) {
+        if(i->second == d.second) {
+            return d.first;
+        }
+    }
+
+    return "";
+}
+}

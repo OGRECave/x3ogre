@@ -1,0 +1,5 @@
+[General]
+FileSystem=@OGRE_MEDIA_DIR@
+Zip=@OGRE_MEDIA_DIR@/packs/SdkTrays.zip
+FileSystem=@OGRE_MEDIA_DIR@/materials/scripts
+FileSystem=@OGRE_MEDIA_DIR@/materials/textures
