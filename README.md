@@ -8,6 +8,19 @@ The goal is to load X3D scenes while using the efficient Ogre Meshes and more ad
 
 Unlike other exiting X3D renderers, it offers true cross-platform compatibility being deployable to the Web, Desktop and Mobile.
 
+Citing
+------
+```
+@inproceedings{rojtberg2017x3ogre,
+  title={x3ogre: connecting X3D to a state of the art rendering engine},
+  author={Rojtberg, Pavel and Audenrith, Benjamin},
+  booktitle={Proceedings of the 22nd International Conference on 3D Web Technology},
+  pages={2},
+  year={2017},
+  organization={ACM}
+}
+```
+
 Documentation
 -------------
 There are two declarative APIs available for usage with x3ogre, the declarative X3D and the Ogre Material System
@@ -19,7 +32,7 @@ For more details on x3ogre see
 * [Supported X3D Nodes](docs/x3d-nodes.md)
 * [System Architecture](docs/system-architecture.md)
 
-Code Contribution
+Contributing
 -----------------
 To get your code into master, make your changes in a new branch and [submit a merge request](../pulls).
 The acceptance criteria are:
