@@ -20,6 +20,7 @@ Citing
   organization={ACM}
 }
 ```
+[Authors Copy of the Paper](docs/x3ogre-author.pdf)
 
 Documentation
 -------------
