@@ -6,6 +6,7 @@
 #include <OgreOverlaySystem.h>
 #include <OgreTrays.h>
 #include <OgreAdvancedRenderControls.h>
+#include <OgreCameraMan.h>
 
 #include <World/Viewpoint.h>
 
@@ -42,6 +43,7 @@ struct X3Ogre : public OgreBites::ApplicationContext, OgreBites::InputListener {
     std::unique_ptr<X3D::SceneAccessInterface> _sai;
     std::unique_ptr<OgreBites::TrayManager> _trays;
     std::unique_ptr<OgreBites::AdvancedRenderControls> _controls;
+    std::unique_ptr<OgreBites::CameraMan> _camman;
 
     bool _leftIsPressed = false;
     bool _rightIsPressed = false;
@@ -75,13 +77,24 @@ struct X3Ogre : public OgreBites::ApplicationContext, OgreBites::InputListener {
             _controls.reset();
         }
 
+        if(_camman) {
+            removeInputListener(_camman.get());
+            _camman.reset();
+        }
+
         _sai->loadURL(file);
         _sai->setWindow(getRenderWindow());
         _sai->sceneManager()->addRenderQueueListener(getOverlaySystem());
 
+        auto cam =_sai->scene()->bound<X3D::Viewpoint>()->getCamera();
         _controls.reset(new OgreBites::AdvancedRenderControls(_trays.get(),
-                _sai->scene()->bound<X3D::Viewpoint>()->getCamera()));
+                                                              cam));
         addInputListener(_controls.get());
+
+        _camman.reset(new OgreBites::CameraMan(cam->getParentSceneNode()));
+        _camman->setStyle(OgreBites::CS_ORBIT);
+        _camman->setYawPitchDist(Ogre::Radian(0), Ogre::Radian(0), _sai->getWorldSize());
+        addInputListener(_camman.get());
     }
 
     // internal API
@@ -117,40 +130,6 @@ struct X3Ogre : public OgreBites::ApplicationContext, OgreBites::InputListener {
         _trays.reset();
     }
 
-    bool mouseMoved(const OgreBites::MouseMotionEvent& evt) override {
-        if (_leftIsPressed) {
-            _sai->addRotation(evt.x - _oldXleftKey, evt.y - _oldYleftKey);
-            _oldXleftKey = evt.x;
-            _oldYleftKey = evt.y;
-        }
-        if (_rightIsPressed) {
-            _sai->addTranslation(_oldXrightKey - evt.x, evt.y - _oldYrightKey);
-            _oldXrightKey = evt.x;
-            _oldYrightKey = evt.y;
-        }
-        return true;
-    }
-    bool mousePressed(const OgreBites::MouseButtonEvent& evt) override {
-        if (evt.button == OgreBites::BUTTON_LEFT) {
-            _leftIsPressed = true;
-            _oldXleftKey = evt.x;
-            _oldYleftKey = evt.y;
-        } else if (evt.button == OgreBites::BUTTON_RIGHT) {
-            _rightIsPressed = true;
-            _oldXrightKey = evt.x;
-            _oldYrightKey = evt.y;
-        }
-        return true;
-    }
-    bool mouseReleased(const OgreBites::MouseButtonEvent& evt) override {
-        if (evt.button == OgreBites::BUTTON_LEFT) {
-            _leftIsPressed = false;
-        } else if (evt.button == OgreBites::BUTTON_RIGHT) {
-            _rightIsPressed = false;
-        }
-        return true;
-    }
-
     bool keyPressed(const OgreBites::KeyboardEvent& evt) override {
         switch(evt.keysym.sym) {
         case SDLK_ESCAPE:
@@ -160,7 +139,7 @@ struct X3Ogre : public OgreBites::ApplicationContext, OgreBites::InputListener {
             _sai->switchDebugDrawing();
             break;
         case 'w':
-            _sai->showWorld();
+            _camman->setYawPitchDist(Ogre::Radian(0), Ogre::Radian(0), _sai->getWorldSize());
             break;
         case 'x':
             auto comp = getNodeAttribute("vp", "compositors").empty() ? "Night Vision" : "";
@@ -168,13 +147,6 @@ struct X3Ogre : public OgreBites::ApplicationContext, OgreBites::InputListener {
             break;
         }
 
-        return true;
-    }
-
-    bool mouseWheelRolled(const OgreBites::MouseWheelEvent& evt) override {
-        if (evt.y) {
-            _sai->zoom(evt.y);
-        }
         return true;
     }
 };

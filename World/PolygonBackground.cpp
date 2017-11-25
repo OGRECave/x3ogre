@@ -36,7 +36,7 @@ void PolygonBackground::initialise(World& world) {
 	// Create background rectangle covering the whole screen
 	_rect.reset(new Ogre::Rectangle2D(true));
 	_rect->setCorners(-1, 1, 1, -1);
-	_rect->setMaterial(_appearance->name());
+	_rect->setMaterial(_appearance->getOgreMaterial());
 
 	// Render the background before everything else
 	_rect->setRenderQueueGroup(Ogre::RENDER_QUEUE_BACKGROUND);

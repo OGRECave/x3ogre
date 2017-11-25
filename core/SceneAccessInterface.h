@@ -93,41 +93,15 @@ public:
 
     bool frameStarted(const Ogre::FrameEvent& evt);
 
-
-    /***********************
-     * IO Function calls
-     **********************/
-
     /**
      * Enables/Disables DebugDrawing
      */
     void switchDebugDrawing();
 
     /**
-     * Translates the ControlSceneNode
-     * Distance computed from a 2D-Movement
-	 * @param dx Movement-Speed in x-Direction
-	 * @param dy Movement-Speed in y-Direction
-     */
-    void addTranslation(int dx, int dy);
-
-    /**
-	 * Rotates the ControlSceneNode
-	 * Angle computed from a 2D-Movement
-	 * @param dx Movement-Speed in x-Direction
-	 * @param dy Movement-Speed in y-Direction
+	 * length of the world bbox diagonal
 	 */
-    void addRotation(int dx, int dy);
-
-    /**
-	 * Zooms the Camera
-	 */
-    void zoom(float relFactor);
-
-    /**
-	 * Shows the whole world to the ControlSceneNode
-	 */
-    void showWorld();
+    float getWorldSize();
 };
 
 } /* namespace X3D */

@@ -157,7 +157,7 @@ void SceneAccessInterface::loadURL(const std::string& url) {
     _fileName = filename;
     _basePath = basepath;
 
-    _sceneManager = mRoot->createSceneManager(Ogre::ST_GENERIC);
+    _sceneManager = mRoot->createSceneManager();
     mShaderGenerator->addSceneManager(_sceneManager);
 
     _scene.reset(new Scene);
@@ -172,7 +172,6 @@ void SceneAccessInterface::loadURL(const std::string& url) {
     	throw e;
     }
 
-    showWorld();
     init = true;
 }
 
@@ -230,38 +229,10 @@ void SceneAccessInterface::switchDebugDrawing() {
 	_sceneManager->showBoundingBoxes(_doDebugDrawing);
 }
 
-void SceneAccessInterface::addTranslation(int dx, int dy) {
-    auto cam = _scene->bound<Viewpoint>()->getNode();
-    auto dist = (cam->getPosition() - _camTgt).length();
-    _camTgt += cam->getOrientation() * Ogre::Vector3(0.0025 * dx*dist, 0.0025 * dy*dist, 0);
-    cam->setPosition(_camTgt);
-    cam->translate(Ogre::Vector3(0, 0, dist), Ogre::Node::TS_LOCAL);
-}
-
-void SceneAccessInterface::addRotation(int dx, int dy) {
-    auto cam = _scene->bound<Viewpoint>()->getNode();
-    auto dist = (cam->getPosition() - _camTgt).length();
-
-    cam->setPosition(_camTgt);
-
-    cam->yaw(Ogre::Degree(-dx * 0.25f));
-    cam->pitch(Ogre::Degree(-dy * 0.25f));
-    cam->translate(Ogre::Vector3(0, 0, dist), Ogre::Node::TS_LOCAL);
-}
-
-void SceneAccessInterface::zoom(float relFactor) {
-    auto cam = _scene->bound<Viewpoint>()->getNode();
-    auto dist = cam->getPosition().length();
-    relFactor = relFactor > 0 ? -1 : 1;
-    cam->translate(Ogre::Vector3(0, 0, relFactor * 0.08f * dist), Ogre::Node::TS_LOCAL);
-}
-
-void SceneAccessInterface::showWorld() {
+float SceneAccessInterface::getWorldSize() {
     auto cam = _scene->bound<Viewpoint>()->getNode();
     auto bbox = getWorldBoundingBox(_sceneManager->getRootSceneNode(), cam);
-    _camTgt = Ogre::Vector3::ZERO;
-    cam->setPosition(_camTgt);
-    cam->translate(Ogre::Vector3(0, 0, bbox.getSize().length()), Ogre::Node::TS_LOCAL);
+    return bbox.getSize().length();
 }
 
 } /* namespace X3D */

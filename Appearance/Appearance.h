@@ -92,6 +92,10 @@ public:
 	 */
 	Material* getMaterial();
 
+	Ogre::MaterialPtr getOgreMaterial() {
+	    return _mat;
+	}
+
     /**
      * Returns the Pass specified by the Appearance
      * @return specified Pass
