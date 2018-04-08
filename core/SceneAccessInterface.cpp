@@ -23,8 +23,6 @@
 #include <OgreSGTechniqueResolverListener.h>
 #include <OgreLogManager.h>
 
-#include <Parser/X3DFile.h>
-
 #include <sstream>
 
 #ifdef WIN32
@@ -107,7 +105,6 @@ void SceneAccessInterface::clearWorld() {
 	if (_scene) {
         // Reset World
 	    _scene.reset();
-		_x3dFM->removeAll();
 
 		// Remove current basepath from FileSystem
 		Ogre::ResourceGroupManager::getSingleton().removeResourceLocation(_basePath, "X3D");

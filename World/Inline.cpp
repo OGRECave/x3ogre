@@ -10,7 +10,6 @@
 
 #include <World/Inline.h>
 #include <Parser/X3DFileManager.h>
-#include <Parser/X3DFile.h>
 #include <World/Scene.h>
 
 #include <World/Background.h>
@@ -43,7 +42,7 @@ void Inline::initialise(World& world) {
     if (_load) {
         _scene.reset(new Scene);
         _scene->attachTo(_groupParent);
-        X3DFileManager::getSingleton().load(_url, "X3D", _scene, _nameSpace);
+        X3DFileManager::getSingleton().load(_url, "X3D", _scene, nameSpace());
         _scene->initialise(world);
     }
 }
