@@ -45,11 +45,6 @@ struct X3Ogre : public OgreBites::ApplicationContext, OgreBites::InputListener {
     std::unique_ptr<OgreBites::AdvancedRenderControls> _controls;
     std::unique_ptr<OgreBites::CameraMan> _camman;
 
-    bool _leftIsPressed = false;
-    bool _rightIsPressed = false;
-    int _oldXleftKey=0, _oldYleftKey=0;
-    int _oldXrightKey=0, _oldYrightKey=0;
-
     X3Ogre() : OgreBites::ApplicationContext("x3ogre", false) {
         initApp();
     }
@@ -106,7 +101,6 @@ struct X3Ogre : public OgreBites::ApplicationContext, OgreBites::InputListener {
         addInputListener(_trays.get());
         _trays->showFrameStats(OgreBites::TL_BOTTOMLEFT);
         _trays->hideCursor();
-        SDL_ShowCursor(SDL_TRUE);
 
         // SAI init
         _sai.reset(new X3D::SceneAccessInterface(getRoot()));
@@ -131,6 +125,7 @@ struct X3Ogre : public OgreBites::ApplicationContext, OgreBites::InputListener {
     }
 
     bool keyPressed(const OgreBites::KeyboardEvent& evt) override {
+        using namespace OgreBites;
         switch(evt.keysym.sym) {
         case SDLK_ESCAPE:
             getRoot()->queueEndRendering();

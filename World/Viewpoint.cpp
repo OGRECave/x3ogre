@@ -37,12 +37,15 @@ void Viewpoint::orientation(const Ogre::Quaternion& orientation) {
 }
 
 void Viewpoint::modelviewMatrix(const Ogre::Matrix4& modelview) {
-    OgreAssert(modelview.isAffine(), "The modelview matrix is not affine");
-
 	Ogre::Vector3 pos(0,0,0), scale(0,0,0);
 	Ogre::Quaternion rot(0,0,0,1);
 
+#if OGRE_VERSION < (1 << 16 | 11 << 8)
+    OgreAssert(modelview.isAffine(), "The modelview matrix is not affine");
 	modelview.inverse().decomposition(pos,scale,rot);
+#else
+	Ogre::Affine3(modelview).inverse().decomposition(pos,scale,rot);
+#endif
 	_cameraNode->setPosition(pos);
 	_cameraNode->setOrientation(rot);
 	_cameraNode->setScale(scale);

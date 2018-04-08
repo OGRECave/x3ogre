@@ -45,6 +45,7 @@ file(GLOB core_SRC
 add_library(X3OgreCore ${core_SRC} 
     ${PROJECT_SOURCE_DIR}/reflection/db.cpp
     ${PROJECT_SOURCE_DIR}/reflection/TypeInfo.cpp)
+target_link_libraries(X3OgreCore ${OGRE_LIBRARIES})
 
 generate_export_header(X3OgreCore
     EXPORT_FILE_NAME ${PROJECT_BINARY_DIR}/x3ogre_core_export.h)
@@ -59,7 +60,7 @@ file(GLOB nodes_SRC
     ${PROJECT_SOURCE_DIR}/World/*.cpp)
 
 add_library(X3DNodes ${nodes_SRC})
-target_link_libraries(X3DNodes X3OgreCore ${OGRE_LIBRARIES})
+target_link_libraries(X3DNodes X3OgreCore)
 
 set(MEDIA_DIR ${CMAKE_BINARY_DIR}/x3ogre_media/)
 # RTSS data
@@ -115,4 +116,4 @@ if(EMSCRIPTEN)
 endif()
 
 add_executable(x3ogre apps/viewer.cpp)
-target_link_libraries(x3ogre X3OgreCore X3DNodes ${OGRE_LIBRARIES})
+target_link_libraries(x3ogre X3OgreCore X3DNodes)
