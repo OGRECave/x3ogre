@@ -66,8 +66,7 @@ Ogre::AxisAlignedBox getWorldBoundingBox(Ogre::SceneNode* node, Ogre::SceneNode*
 }
 
 namespace X3D {
-SceneAccessInterface::SceneAccessInterface(Ogre::Root* root) : mRoot(root) {
-    root->addFrameListener(this);
+SceneAccessInterface::SceneAccessInterface() {
     mShaderGenerator = Ogre::RTShader::ShaderGenerator::getSingletonPtr();
 
     // Set default point size to 3
@@ -107,27 +106,16 @@ std::string SceneAccessInterface::getNodeAttribute(const std::string& nodeName, 
 void SceneAccessInterface::clearWorld() {
 	if (_scene) {
         // Reset World
-	    mShaderGenerator->removeSceneManager(_sceneManager);
-	    mRoot->destroySceneManager(_sceneManager);
 	    _scene.reset();
 		_x3dFM->removeAll();
 
 		// Remove current basepath from FileSystem
 		Ogre::ResourceGroupManager::getSingleton().removeResourceLocation(_basePath, "X3D");
         Ogre::ResourceGroupManager::getSingleton().unloadResourceGroup("X3D");
-
-        if (mShaderGenerator) {
-            mShaderGenerator->removeAllShaderBasedTechniques();
-            mShaderGenerator->flushShaderCache();
-        }
 	}
 }
 
-void SceneAccessInterface::loadURL(const std::string& url) {
-	if (not mShaderGenerator) {
-        throw std::runtime_error(std::string("RTSS must be initialized before") + __func__);
-    }
-
+void SceneAccessInterface::loadURL(const std::string& url, Ogre::SceneNode* rootNode) {
 	// Reset values to default for reloading a second URL
 	if (init) {
 		clearWorld();
@@ -156,16 +144,14 @@ void SceneAccessInterface::loadURL(const std::string& url) {
     _camTgt = Ogre::Vector3::ZERO;
     _fileName = filename;
     _basePath = basepath;
-
-    _sceneManager = mRoot->createSceneManager();
-    mShaderGenerator->addSceneManager(_sceneManager);
+    _rootNode = rootNode;
 
     _scene.reset(new Scene);
-    _scene->attachTo(_sceneManager->getRootSceneNode());
+    _scene->attachTo(_rootNode);
     _x3dFM->load(filename, "X3D", _scene);
 
     try {
-        World world = {_sceneManager, _scene.get()};
+        World world = {rootNode->getCreator(), _scene.get()};
     	_scene->initialiseAndFill(world);
     } catch (Ogre::Exception& e) {
     	clearWorld();
@@ -190,9 +176,6 @@ void SceneAccessInterface::setWindow(Ogre::RenderWindow* window) {
 
 SceneAccessInterface::~SceneAccessInterface() {
     clearWorld();
-    if(_x3dFM) {
-        Ogre::ResourceGroupManager::getSingleton()._unregisterScriptLoader(_x3dFM.get());
-    }
 }
 
 void SceneAccessInterface::setDefaultAnisotropy(uint32_t lvl) {
@@ -225,13 +208,14 @@ bool SceneAccessInterface::frameStarted(const Ogre::FrameEvent& evt) {
 
 void SceneAccessInterface::switchDebugDrawing() {
 	_doDebugDrawing = !_doDebugDrawing;
-	_sceneManager->setDisplaySceneNodes(_doDebugDrawing);
-	_sceneManager->showBoundingBoxes(_doDebugDrawing);
+	auto sceneManager = _rootNode->getCreator();
+	sceneManager->setDisplaySceneNodes(_doDebugDrawing);
+	sceneManager->showBoundingBoxes(_doDebugDrawing);
 }
 
 float SceneAccessInterface::getWorldSize() {
     auto cam = _scene->bound<Viewpoint>()->getNode();
-    auto bbox = getWorldBoundingBox(_sceneManager->getRootSceneNode(), cam);
+    auto bbox = getWorldBoundingBox(_rootNode, cam);
     return bbox.getSize().length();
 }
 

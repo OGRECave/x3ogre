@@ -36,7 +36,7 @@ namespace X3D {
 class X3OGRECORE_EXPORT SceneAccessInterface : public Ogre::FrameListener  {
     bool init = false;
     std::shared_ptr<Scene> _scene;
-    Ogre::SceneManager* _sceneManager = nullptr;
+    Ogre::SceneNode* _rootNode = nullptr;
 
     std::string _fileName;
     std::string _basePath;
@@ -65,10 +65,8 @@ class X3OGRECORE_EXPORT SceneAccessInterface : public Ogre::FrameListener  {
     Ogre::Vector3 _camTgt = Ogre::Vector3::ZERO;
 
     Ogre::RTShader::ShaderGenerator* mShaderGenerator;
-
-    Ogre::Root* mRoot;
 public:
-    SceneAccessInterface(Ogre::Root* root);
+    SceneAccessInterface();
     ~SceneAccessInterface();
 
     /**
@@ -81,14 +79,10 @@ public:
 
     std::string getNodeAttribute(const std::string& nodeName, const std::string& fieldName);
 
-    void loadURL(const std::string& url);
+    void loadURL(const std::string& url, Ogre::SceneNode* rootNode);
 
     Scene* scene() {
         return _scene.get();
-    }
-
-    Ogre::SceneManager* sceneManager() {
-        return _sceneManager;
     }
 
     bool frameStarted(const Ogre::FrameEvent& evt);

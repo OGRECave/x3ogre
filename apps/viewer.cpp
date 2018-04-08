@@ -45,6 +45,8 @@ struct X3Ogre : public OgreBites::ApplicationContext, OgreBites::InputListener {
     std::unique_ptr<OgreBites::AdvancedRenderControls> _controls;
     std::unique_ptr<OgreBites::CameraMan> _camman;
 
+    Ogre::SceneManager* _sceneManager = nullptr;
+
     X3Ogre() : OgreBites::ApplicationContext("x3ogre", false) {
         initApp();
     }
@@ -77,9 +79,20 @@ struct X3Ogre : public OgreBites::ApplicationContext, OgreBites::InputListener {
             _camman.reset();
         }
 
-        _sai->loadURL(file);
+        if (_sceneManager) {
+            mShaderGenerator->removeSceneManager(_sceneManager);
+            mRoot->destroySceneManager(_sceneManager);
+
+            mShaderGenerator->removeAllShaderBasedTechniques();
+            mShaderGenerator->flushShaderCache();
+        }
+
+        _sceneManager = mRoot->createSceneManager();
+        mShaderGenerator->addSceneManager(_sceneManager);
+
+        _sai->loadURL(file, _sceneManager->getRootSceneNode());
         _sai->setWindow(getRenderWindow());
-        _sai->sceneManager()->addRenderQueueListener(getOverlaySystem());
+        _sceneManager->addRenderQueueListener(getOverlaySystem());
 
         auto cam =_sai->scene()->bound<X3D::Viewpoint>()->getCamera();
         _controls.reset(new OgreBites::AdvancedRenderControls(_trays.get(),
@@ -103,7 +116,8 @@ struct X3Ogre : public OgreBites::ApplicationContext, OgreBites::InputListener {
         _trays->hideCursor();
 
         // SAI init
-        _sai.reset(new X3D::SceneAccessInterface(getRoot()));
+        _sai.reset(new X3D::SceneAccessInterface());
+        getRoot()->addFrameListener(_sai.get());
         addInputListener(this);
     }
 
@@ -116,6 +130,7 @@ struct X3Ogre : public OgreBites::ApplicationContext, OgreBites::InputListener {
     }
 
     void shutdown() override {
+        getRoot()->removeFrameListener(_sai.get());
         removeInputListener(this);
         removeInputListener(_trays.get());
         removeInputListener(_controls.get());
