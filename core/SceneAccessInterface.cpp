@@ -9,6 +9,10 @@
 #include <core/SceneAccessInterface.h>
 
 #include <World/Viewpoint.h>
+#include <World/NavigationInfo.h>
+#include <World/Viewpoint.h>
+#include <World/Background.h>
+#include <World/PolygonBackground.h>
 
 #include <reflection/db.h>
 
@@ -128,11 +132,9 @@ void SceneAccessInterface::loadURL(const std::string& url, Ogre::SceneNode* root
     _basePath = basepath;
     _rootNode = rootNode;
 
-    _x3dFM->load(filename, "X3D", _rootNode);
-
     try {
-        World world = {rootNode->getCreator(), scene()};
-    	world.scene()->initialiseAndFill(world);
+        _x3dFM->load(filename, "X3D", _rootNode);
+        addEssentialNodes();
     } catch (Ogre::Exception& e) {
     	clearWorld();
     	throw e;
@@ -140,6 +142,41 @@ void SceneAccessInterface::loadURL(const std::string& url, Ogre::SceneNode* root
 
     init = true;
 }
+
+void SceneAccessInterface::addEssentialNodes()
+{
+    auto _scene = scene();
+    World world = {_rootNode->getCreator(), _scene};
+
+    auto vp = _scene->bound<Viewpoint>();
+    if (not vp) {
+        auto node = std::make_shared<Viewpoint>();
+        vp = node.get();
+        _scene->addChild(node);
+        vp->initialise(world);
+    }
+
+    auto ni = _scene->bound<NavigationInfo>();
+    if (not ni) {
+        auto node = std::make_shared<NavigationInfo>();
+        ni = node.get();
+        _scene->addChild(node);
+        ni->initialise(world);
+    }
+
+    auto bg = _scene->bound<Background>();
+    auto pb = _scene->bound<PolygonBackground>();
+    if (not bg and not pb) {
+        auto node = std::make_shared<Background>();
+        bg = node.get();
+        _scene->addChild(node);
+        bg->initialise(world);
+    }
+
+    // Add Headlight to Camera
+    ni->getLight()->attachTo(vp->getNode());
+}
+
 Scene* SceneAccessInterface::scene()
 {
     auto scene = Ogre::any_cast<std::shared_ptr<Scene>>(_rootNode->getUserObjectBindings().getUserAny("x3d_scene"));

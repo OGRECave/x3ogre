@@ -95,13 +95,6 @@ public:
      */
     const std::shared_ptr<Node>& _shareNode(const std::string& name) const;
 
-	/**
-	 * Initialization Function.
-	 * Completes missing Information of the Scene and initializes the underlying classes.
-	 * @param sceneManager Scene Manager
-	 */
-	void initialiseAndFill(World& world);
-
 	WorldInfo* worldInfo();
 
 	Ogre::SceneNode* getSceneNode() {

@@ -9,11 +9,8 @@
 
 #include <OgreControllerManager.h>
 
-#include <Geometry/Shape.h>
-#include <World/NavigationInfo.h>
-#include <World/Viewpoint.h>
 #include <World/Background.h>
-#include <World/PolygonBackground.h>
+#include <Geometry/Shape.h>
 #include <World/WorldInfo.h>
 
 using namespace X3D;
@@ -35,44 +32,6 @@ void Scene::addChild(const std::shared_ptr<Node>& obj) {
 		_worldInfo = wi;
 		return;
 	}
-}
-
-void Scene::initialiseAndFill(World& world) {
-	if (_init) {
-		return;
-	}
-
-	Group::initialise(world);
-
-	auto vp = bound<Viewpoint>();
-	if (not vp) {
-	    auto node = std::make_shared<Viewpoint>();
-	    vp = node.get();
-		addChild(node);
-		vp->initialise(world);
-	}
-
-	auto ni = bound<NavigationInfo>();
-	if (not ni) {
-        auto node = std::make_shared<NavigationInfo>();
-        ni = node.get();
-        addChild(node);
-		ni->initialise(world);
-	}
-
-	auto bg = bound<Background>();
-	auto pb = bound<PolygonBackground>();
-	if (not bg and not pb) {
-        auto node = std::make_shared<Background>();
-        bg = node.get();
-        addChild(node);
-		bg->initialise(world);
-	}
-
-	// Add Headlight to Camera
-    ni->getLight()->attachTo(vp->getNode());
-
-	_init = true;
 }
 
 void Scene::setViewport(Ogre::Viewport* viewport) {

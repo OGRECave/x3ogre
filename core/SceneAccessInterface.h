@@ -71,6 +71,9 @@ public:
 
     void loadURL(const std::string& url, Ogre::SceneNode* rootNode);
 
+    /// adds essential nodes like Viewpoint and Navigation info if not specified in file
+    void addEssentialNodes();
+
     Scene* scene();
 
     bool frameStarted(const Ogre::FrameEvent& evt);

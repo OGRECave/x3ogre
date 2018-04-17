@@ -36,6 +36,9 @@ void X3DFileManager::load(const Ogre::String& filename,
     } catch (std::exception &e) {
         Ogre::LogManager::getSingleton().logMessage("error parsing '"+stream->getName()+": "+e.what(), Ogre::LML_CRITICAL);
     }
+
+    World world = {rootNode->getCreator(), scene.get()};
+    scene->initialise(world);
 }
 
 X3DFileManager* X3DFileManager::getSingletonPtr(void) { return msSingleton; }
