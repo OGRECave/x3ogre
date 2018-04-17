@@ -17,10 +17,7 @@
 #include <OgreRoot.h>
 
 #include <OgreMaterialManager.h>
-#include <OgreShaderRenderState.h>
-#include <OgreShaderExPerPixelLighting.h>
 #include <OgreTechnique.h>
-#include <OgreSGTechniqueResolverListener.h>
 #include <OgreLogManager.h>
 
 #include <sstream>
@@ -65,22 +62,10 @@ Ogre::AxisAlignedBox getWorldBoundingBox(Ogre::SceneNode* node, Ogre::SceneNode*
 
 namespace X3D {
 SceneAccessInterface::SceneAccessInterface() {
-    mShaderGenerator = Ogre::RTShader::ShaderGenerator::getSingletonPtr();
-
     // Set default point size to 3
     Ogre::MaterialManager::getSingleton().getDefaultSettings()->setPointSize(3);
 
     _x3dFM.reset(new X3DFileManager);
-}
-
-void SceneAccessInterface::forcePerPixelLighting() {
-    using namespace Ogre::RTShader;
-    RenderState* globalRS = mShaderGenerator->getRenderState(ShaderGenerator::DEFAULT_SCHEME_NAME);
-
-    // Add PerPixelLighting. Notes:
-    // - PerPixelLightingFactory already exists (Added in ShaderGenerator::initialize())
-    // - globalRS does not need to be reset as we do this before loading anything
-    globalRS->addTemplateSubRenderState(mShaderGenerator->createSubRenderState(PerPixelLighting::Type));
 }
 
 void SceneAccessInterface::setNodeAttribute(const std::string& nodeName, const std::string& fieldName, const std::string& fieldValue, bool buffer) {
@@ -178,13 +163,6 @@ void SceneAccessInterface::setWindow(Ogre::RenderWindow* window) {
 SceneAccessInterface::~SceneAccessInterface() {
     clearWorld();
 }
-
-void SceneAccessInterface::setDefaultAnisotropy(uint32_t lvl) {
-    auto& matmgr = Ogre::MaterialManager::getSingleton();
-    matmgr.setDefaultTextureFiltering(Ogre::TFO_ANISOTROPIC);
-    matmgr.setDefaultAnisotropy(lvl);
-}
-
 
 bool SceneAccessInterface::frameStarted(const Ogre::FrameEvent& evt) {
     _updateMutex.lock();

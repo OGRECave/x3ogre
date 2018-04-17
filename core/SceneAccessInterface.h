@@ -49,21 +49,12 @@ class X3OGRECORE_EXPORT SceneAccessInterface : public Ogre::FrameListener  {
     std::mutex _updateMutex;
 
     /**
-     * enforce per pixel lighting for all RTSS materials
-     */
-    void forcePerPixelLighting();
-
-    void setDefaultAnisotropy(uint32_t lvl);
-
-    /**
      * Unloads current File and resets all necessary references to enable
      * 	reloading a new file
      */
     void clearWorld();
 
     Ogre::Vector3 _camTgt = Ogre::Vector3::ZERO;
-
-    Ogre::RTShader::ShaderGenerator* mShaderGenerator;
 public:
     SceneAccessInterface();
     ~SceneAccessInterface();
