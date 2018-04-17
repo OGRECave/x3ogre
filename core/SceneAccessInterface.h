@@ -35,7 +35,6 @@ namespace X3D {
  */
 class X3OGRECORE_EXPORT SceneAccessInterface : public Ogre::FrameListener  {
     bool init = false;
-    std::shared_ptr<Scene> _scene;
     Ogre::SceneNode* _rootNode = nullptr;
 
     std::string _fileName;
@@ -81,9 +80,7 @@ public:
 
     void loadURL(const std::string& url, Ogre::SceneNode* rootNode);
 
-    Scene* scene() {
-        return _scene.get();
-    }
+    Scene* scene();
 
     bool frameStarted(const Ogre::FrameEvent& evt);
 

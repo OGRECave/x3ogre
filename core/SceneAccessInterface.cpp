@@ -89,22 +89,22 @@ void SceneAccessInterface::setNodeAttribute(const std::string& nodeName, const s
         _updates[std::pair<std::string,std::string>(nodeName,fieldName)]=fieldValue;
     } else {
         
-        auto obj = _scene->getNode(nodeName);
+        auto obj = scene()->getNode(nodeName);
         auto ti = reflection::getTypeInfo(*obj);
         ti->callMember(obj, fieldName, fieldValue);
     }
 }
 
 std::string SceneAccessInterface::getNodeAttribute(const std::string& nodeName, const std::string& fieldName) {
-    Node* obj = _scene->getNode(nodeName);
+    Node* obj = scene()->getNode(nodeName);
     reflection::TypeInfoCommon* ti = reflection::getTypeInfo(*obj);
     return ti->callMemberString(obj, fieldName);
 }
 
 void SceneAccessInterface::clearWorld() {
-	if (_scene) {
+	if (scene()) {
         // Reset World
-	    _scene.reset();
+	    _rootNode->getUserObjectBindings().eraseUserAny("x3d_scene");
 
 		// Remove current basepath from FileSystem
 		Ogre::ResourceGroupManager::getSingleton().removeResourceLocation(_basePath, "X3D");
@@ -143,19 +143,22 @@ void SceneAccessInterface::loadURL(const std::string& url, Ogre::SceneNode* root
     _basePath = basepath;
     _rootNode = rootNode;
 
-    _scene.reset(new Scene);
-    _scene->attachTo(_rootNode);
-    _x3dFM->load(filename, "X3D", _scene);
+    _x3dFM->load(filename, "X3D", _rootNode);
 
     try {
-        World world = {rootNode->getCreator(), _scene.get()};
-    	_scene->initialiseAndFill(world);
+        World world = {rootNode->getCreator(), scene()};
+    	world.scene()->initialiseAndFill(world);
     } catch (Ogre::Exception& e) {
     	clearWorld();
     	throw e;
     }
 
     init = true;
+}
+Scene* SceneAccessInterface::scene()
+{
+    auto scene = Ogre::any_cast<std::shared_ptr<Scene>>(_rootNode->getUserObjectBindings().getUserAny("x3d_scene"));
+    return scene.get();
 }
 
 void SceneAccessInterface::setWindow(Ogre::RenderWindow* window) {
@@ -165,6 +168,7 @@ void SceneAccessInterface::setWindow(Ogre::RenderWindow* window) {
     }
 
     // By default create a viewport with full window size
+    auto _scene = scene();
     auto vp = _scene->bound<Viewpoint>();
     auto fullscreenViewport = window->addViewport(vp->getCamera());
     _scene->setViewport(fullscreenViewport);
@@ -211,7 +215,7 @@ void SceneAccessInterface::switchDebugDrawing() {
 }
 
 float SceneAccessInterface::getWorldSize() {
-    auto cam = _scene->bound<Viewpoint>()->getNode();
+    auto cam = scene()->bound<Viewpoint>()->getNode();
     auto bbox = getWorldBoundingBox(_rootNode, cam);
     return bbox.getSize().length();
 }

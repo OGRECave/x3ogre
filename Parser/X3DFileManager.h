@@ -13,6 +13,7 @@
 #include <OgreString.h>
 #include <OgreSingleton.h>
 #include <OgreResourceManager.h>
+#include <OgreSceneNode.h>
 
 #include <map>
 
@@ -27,13 +28,11 @@ class Scene;
 class X3DFileManager : public Ogre::Singleton<X3DFileManager>
 {
 public:
-    typedef std::shared_ptr<Scene> ScenePtr;
-public:
     X3DFileManager();
     ~X3DFileManager();
 
     void load(const Ogre::String& filename, const Ogre::String& groupName,
-            ScenePtr& scene, const Ogre::String& nameSpace = "");
+            Ogre::SceneNode* rootNode, const Ogre::String& nameSpace = "");
 
     /// @copydoc Singleton::getSingleton()
     static X3DFileManager& getSingleton(void);

@@ -19,9 +19,13 @@ using namespace X3D;
 template<> X3DFileManager* Ogre::Singleton<X3DFileManager>::msSingleton = 0;
 
 void X3DFileManager::load(const Ogre::String& filename,
-                                     const Ogre::String& groupName,
-                                     ScenePtr& scene, const Ogre::String& nameSpace) {
+                          const Ogre::String& groupName,
+                          Ogre::SceneNode* rootNode, const Ogre::String& nameSpace) {
     auto stream = Ogre::ResourceGroupManager::getSingleton().openResource(filename, groupName);
+
+    auto scene = std::make_shared<Scene>();
+    scene->attachTo(rootNode);
+    rootNode->getUserObjectBindings().setUserAny("x3d_scene", Ogre::Any(scene));
 
     std::string xml = stream->getAsString();
     stream->close();

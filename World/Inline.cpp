@@ -40,10 +40,9 @@ const std::string Inline::nameSpace() {
 
 void Inline::initialise(World& world) {
     if (_load) {
-        _scene.reset(new Scene);
-        _scene->attachTo(_groupParent);
-        X3DFileManager::getSingleton().load(_url, "X3D", _scene, nameSpace());
-        _scene->initialise(world);
+        X3DFileManager::getSingleton().load(_url, "X3D", _groupParent, nameSpace());
+        auto scene = Ogre::any_cast<std::shared_ptr<Scene>>(_groupParent->getUserObjectBindings().getUserAny("x3d_scene"));
+        scene->initialise(world);
     }
 }
 

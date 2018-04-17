@@ -25,8 +25,6 @@ private:
 	std::string _url;
 	bool _load = true;
 
-	std::shared_ptr<Scene> _scene;
-
 public:
 	void id(const std::string& id) override {
 		_nameSpace = id;
