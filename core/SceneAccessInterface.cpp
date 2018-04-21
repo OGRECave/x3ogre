@@ -133,7 +133,8 @@ void SceneAccessInterface::loadURL(const std::string& url, Ogre::SceneNode* root
     _rootNode = rootNode;
 
     try {
-        _x3dFM->load(filename, "X3D", _rootNode);
+        auto stream = Ogre::ResourceGroupManager::getSingleton().openResource(filename, "X3D");
+        _x3dFM->load(stream, "X3D", _rootNode);
         addEssentialNodes();
     } catch (Ogre::Exception& e) {
     	clearWorld();

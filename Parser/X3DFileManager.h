@@ -31,7 +31,7 @@ public:
     X3DFileManager();
     ~X3DFileManager();
 
-    void load(const Ogre::String& filename, const Ogre::String& groupName,
+    void load(Ogre::DataStreamPtr& stream, const Ogre::String& groupName,
             Ogre::SceneNode* rootNode, const Ogre::String& nameSpace = "");
 
     /// @copydoc Singleton::getSingleton()

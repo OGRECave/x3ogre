@@ -40,7 +40,8 @@ const std::string Inline::nameSpace() {
 
 void Inline::initialise(World& world) {
     if (_load) {
-        X3DFileManager::getSingleton().load(_url, "X3D", _groupParent, nameSpace());
+        auto stream = Ogre::ResourceGroupManager::getSingleton().openResource(_url, "X3D");
+        X3DFileManager::getSingleton().load(stream, "X3D", _groupParent, nameSpace());
     }
 }
 
