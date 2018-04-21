@@ -2,7 +2,7 @@
 
 #include <OgreApplicationContext.h>
 #include <core/SceneAccessInterface.h>
-#include <core/SceneLoader.h>
+#include <core/OgreX3DPlugin.h>
 
 #include <OgreOverlaySystem.h>
 #include <OgreTrays.h>
@@ -47,7 +47,6 @@ struct X3Ogre : public OgreBites::ApplicationContext, OgreBites::InputListener {
     std::unique_ptr<OgreBites::AdvancedRenderControls> _controls;
     std::unique_ptr<OgreBites::CameraMan> _camman;
 
-    std::unique_ptr<Ogre::SceneLoader> _x3dLoader;
     Ogre::SceneManager* _sceneManager = nullptr;
 
     X3Ogre() : OgreBites::ApplicationContext("x3ogre", false) {
@@ -141,7 +140,7 @@ struct X3Ogre : public OgreBites::ApplicationContext, OgreBites::InputListener {
         addInputListener(this);
 
         // register x3d file loader
-        _x3dLoader.reset(new X3D::SceneLoader());
+        getRoot()->installPlugin(new X3D::OgreX3DPlugin);
     }
 
     void loop() {
@@ -160,7 +159,6 @@ struct X3Ogre : public OgreBites::ApplicationContext, OgreBites::InputListener {
         _controls.reset();
         _sai.reset();
         _trays.reset();
-        _x3dLoader.reset();
     }
 
     bool keyPressed(const OgreBites::KeyboardEvent& evt) override {
