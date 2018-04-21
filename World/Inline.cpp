@@ -9,7 +9,6 @@
 
 
 #include <World/Inline.h>
-#include <Parser/X3DFileManager.h>
 #include <World/Scene.h>
 
 #include <World/Background.h>
@@ -18,6 +17,8 @@
 #include <World/WorldInfo.h>
 #include <World/Transform.h>
 
+#include <OgreSceneLoaderManager.h>
+#include <core/SceneLoader.h>
 
 using namespace X3D;
 
@@ -41,7 +42,8 @@ const std::string Inline::nameSpace() {
 void Inline::initialise(World& world) {
     if (_load) {
         auto stream = Ogre::ResourceGroupManager::getSingleton().openResource(_url, "X3D");
-        X3DFileManager::getSingleton().load(stream, "X3D", _groupParent, nameSpace());
+        SceneLoader* fm = dynamic_cast<SceneLoader*>(Ogre::SceneLoaderManager::getSingleton()._getSceneLoader("X3D"));
+        fm->load(stream, "X3D", _groupParent, nameSpace());
     }
 }
 

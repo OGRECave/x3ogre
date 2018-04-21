@@ -5,20 +5,17 @@
  *      Author: baudenri
  */
 
-#include <Parser/X3DFileManager.h>
-#include <core/SceneAccessInterface.h>
+#include "SceneLoader.h"
 #include <core/World.h>
 #include <World/Scene.h>
 #include <Parser/X3DParser.h>
 #include <iostream>
 #include <OgreLogManager.h>
+#include <OgreSceneLoaderManager.h>
 
 using namespace X3D;
 
-//-----------------------------------------------------------------------
-template<> X3DFileManager* Ogre::Singleton<X3DFileManager>::msSingleton = 0;
-
-void X3DFileManager::load(Ogre::DataStreamPtr& stream,
+void SceneLoader::load(Ogre::DataStreamPtr& stream,
                           const Ogre::String& groupName,
                           Ogre::SceneNode* rootNode, const Ogre::String& nameSpace) {
     auto scene = std::make_shared<Scene>();
@@ -39,14 +36,10 @@ void X3DFileManager::load(Ogre::DataStreamPtr& stream,
     scene->initialise(world);
 }
 
-X3DFileManager* X3DFileManager::getSingletonPtr(void) { return msSingleton; }
-X3DFileManager& X3DFileManager::getSingleton(void)
-{
-    assert( msSingleton );  return ( *msSingleton );
+SceneLoader::SceneLoader() {
+    Ogre::SceneLoaderManager::getSingleton().registerSceneLoader("X3D", {".x3d"}, this);
 }
 
-X3DFileManager::X3DFileManager() {
-}
-
-X3DFileManager::~X3DFileManager() {
+SceneLoader::~SceneLoader() {
+    Ogre::SceneLoaderManager::getSingleton().unregisterSceneLoader("X3D");
 }

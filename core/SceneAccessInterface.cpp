@@ -5,7 +5,6 @@
  *      Author: parojtbe
  */
 
-#include <Parser/X3DFileManager.h>
 #include <core/SceneAccessInterface.h>
 
 #include <World/Viewpoint.h>
@@ -65,11 +64,9 @@ Ogre::AxisAlignedBox getWorldBoundingBox(Ogre::SceneNode* node, Ogre::SceneNode*
 }
 
 namespace X3D {
-SceneAccessInterface::SceneAccessInterface() {
-    // Set default point size to 3
-    Ogre::MaterialManager::getSingleton().getDefaultSettings()->setPointSize(3);
-
-    _x3dFM.reset(new X3DFileManager);
+SceneAccessInterface::SceneAccessInterface(Ogre::SceneNode* rootNode) {
+    _rootNode = rootNode;
+    Ogre::Root::getSingleton().addFrameListener(this);
 }
 
 void SceneAccessInterface::setNodeAttribute(const std::string& nodeName, const std::string& fieldName, const std::string& fieldValue, bool buffer) {
@@ -88,36 +85,6 @@ std::string SceneAccessInterface::getNodeAttribute(const std::string& nodeName, 
     Node* obj = scene()->getNode(nodeName);
     reflection::TypeInfoCommon* ti = reflection::getTypeInfo(*obj);
     return ti->callMemberString(obj, fieldName);
-}
-
-void SceneAccessInterface::loadURL(const std::string& url, Ogre::SceneNode* rootNode) {
-	// Reset values to default for reloading a second URL
-	if (!_basePath.empty()) {
-	    // Remove current basepath from ResourceGroupManager
-	    Ogre::ResourceGroupManager::getSingleton().removeResourceLocation(_basePath, "X3D");
-	    Ogre::ResourceGroupManager::getSingleton().unloadResourceGroup("X3D");
-	}
-
-    // add X3D path to Ogre resources
-    Ogre::String filename, basepath;
-    Ogre::StringUtil::splitFilename(url, filename, basepath);
-
-    if (!basepath.empty() && !Ogre::ResourceGroupManager::getSingleton().resourceLocationExists(basepath,"X3D")) {
-        // Counts for android, since APK located files (crash if basepath is empty)
-        Ogre::ResourceGroupManager::getSingleton().addResourceLocation(basepath, "FileSystem", "X3D", true);
-        Ogre::ResourceGroupManager::getSingleton().initialiseResourceGroup("X3D");
-    }
-#ifdef ANDROID
-    else {
-        Ogre::ResourceGroupManager::getSingleton().addResourceLocation("/", "APKFileSystem", "X3D");
-    }
-#endif
-
-    _basePath = basepath;
-    _rootNode = rootNode;
-
-    auto stream = Ogre::ResourceGroupManager::getSingleton().openResource(filename, "X3D");
-    _x3dFM->load(stream, "X3D", _rootNode);
 }
 
 void SceneAccessInterface::addEssentialNodes()
@@ -161,6 +128,7 @@ Scene* SceneAccessInterface::scene()
 }
 
 SceneAccessInterface::~SceneAccessInterface() {
+    Ogre::Root::getSingleton().removeFrameListener(this);
 }
 
 bool SceneAccessInterface::frameStarted(const Ogre::FrameEvent& evt) {

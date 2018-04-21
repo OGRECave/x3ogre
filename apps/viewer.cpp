@@ -2,11 +2,13 @@
 
 #include <OgreApplicationContext.h>
 #include <core/SceneAccessInterface.h>
+#include <core/SceneLoader.h>
 
 #include <OgreOverlaySystem.h>
 #include <OgreTrays.h>
 #include <OgreAdvancedRenderControls.h>
 #include <OgreCameraMan.h>
+#include <OgreSceneLoaderManager.h>
 
 #include <World/Viewpoint.h>
 
@@ -45,6 +47,7 @@ struct X3Ogre : public OgreBites::ApplicationContext, OgreBites::InputListener {
     std::unique_ptr<OgreBites::AdvancedRenderControls> _controls;
     std::unique_ptr<OgreBites::CameraMan> _camman;
 
+    std::unique_ptr<Ogre::SceneLoader> _x3dLoader;
     Ogre::SceneManager* _sceneManager = nullptr;
 
     X3Ogre() : OgreBites::ApplicationContext("x3ogre", false) {
@@ -69,6 +72,17 @@ struct X3Ogre : public OgreBites::ApplicationContext, OgreBites::InputListener {
     }
 
     void loadFile(const std::string& file) {
+        // add X3D path to Ogre resources
+        Ogre::String filename, basepath;
+        Ogre::StringUtil::splitFilename(file, filename, basepath);
+
+        if (!basepath.empty() && !Ogre::ResourceGroupManager::getSingleton().resourceLocationExists(basepath, "X3D"))
+        {
+            // Counts for android, since APK located files (crash if basepath is empty)
+            Ogre::ResourceGroupManager::getSingleton().addResourceLocation(basepath, "FileSystem", "X3D", true);
+            Ogre::ResourceGroupManager::getSingleton().initialiseResourceGroup("X3D");
+        }
+
         if(_controls) {
             removeInputListener(_controls.get());
             _controls.reset();
@@ -96,7 +110,10 @@ struct X3Ogre : public OgreBites::ApplicationContext, OgreBites::InputListener {
         mShaderGenerator->addSceneManager(_sceneManager);
         _sceneManager->addRenderQueueListener(getOverlaySystem());
 
-        _sai->loadURL(file, _sceneManager->getRootSceneNode());
+        Ogre::SceneLoaderManager::getSingleton().load(filename, "X3D", _sceneManager->getRootSceneNode());
+
+        // SAI init
+        _sai.reset(new X3D::SceneAccessInterface(_sceneManager->getRootSceneNode()));
         _sai->addEssentialNodes(); // ensure we have a X3D::Viewpoint
         auto cam =_sai->scene()->bound<X3D::Viewpoint>()->getCamera();
         _sai->scene()->setViewport(getRenderWindow()->addViewport(cam));
@@ -121,10 +138,10 @@ struct X3Ogre : public OgreBites::ApplicationContext, OgreBites::InputListener {
         _trays->showFrameStats(OgreBites::TL_BOTTOMLEFT);
         _trays->hideCursor();
 
-        // SAI init
-        _sai.reset(new X3D::SceneAccessInterface());
-        getRoot()->addFrameListener(_sai.get());
         addInputListener(this);
+
+        // register x3d file loader
+        _x3dLoader.reset(new X3D::SceneLoader());
     }
 
     void loop() {
@@ -143,6 +160,7 @@ struct X3Ogre : public OgreBites::ApplicationContext, OgreBites::InputListener {
         _controls.reset();
         _sai.reset();
         _trays.reset();
+        _x3dLoader.reset();
     }
 
     bool keyPressed(const OgreBites::KeyboardEvent& evt) override {
@@ -153,6 +171,9 @@ struct X3Ogre : public OgreBites::ApplicationContext, OgreBites::InputListener {
             break;
         case 'b':
             _sai->switchDebugDrawing();
+            break;
+        case 'n':
+            loadFile("../examples/flipper.x3d");
             break;
         case 'w':
             _camman->setYawPitchDist(Ogre::Radian(0), Ogre::Radian(0), _sai->getWorldSize());

@@ -16,7 +16,6 @@
 #include <OgreAxisAlignedBox.h>
 #include <OgreFrameListener.h>
 
-#include <Parser/X3DFileManager.h>
 #include <World/Scene.h>
 
 #include <x3ogre_core_export.h>
@@ -34,22 +33,18 @@ class X3OGRECORE_EXPORT SceneAccessInterface : public Ogre::FrameListener  {
     Ogre::SceneNode* _rootNode = nullptr;
     std::string _basePath;
 
-    std::unique_ptr<X3DFileManager> _x3dFM;
-
     bool _doDebugDrawing = false;
 
     // Updates associated by nodeAndField
     std::map<std::pair<std::string,std::string>,std::string> _updates;
     std::mutex _updateMutex;
 public:
-    SceneAccessInterface();
+    SceneAccessInterface(Ogre::SceneNode* rootNode);
     ~SceneAccessInterface();
 
     void setNodeAttribute(const std::string& nodeName, const std::string& fieldName, const std::string& fieldValue, bool buffer = true);
 
     std::string getNodeAttribute(const std::string& nodeName, const std::string& fieldName);
-
-    void loadURL(const std::string& url, Ogre::SceneNode* rootNode);
 
     /// adds essential nodes like Viewpoint and Navigation info if not specified in file
     void addEssentialNodes();

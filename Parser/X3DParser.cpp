@@ -22,8 +22,6 @@
 
 #include <World/Inline.h>
 
-#include <Parser/X3DFileManager.h>
-
 #include <OgreLogManager.h>
 
 using namespace X3D;

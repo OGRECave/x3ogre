@@ -12,7 +12,6 @@
 
 #include <core/Node.h>
 #include <World/Scene.h>
-#include <Parser/X3DFileManager.h>
 #include <reflection/db.h>
 
 #include <cstddef>
