@@ -87,14 +87,20 @@ struct X3Ogre : public OgreBites::ApplicationContext, OgreBites::InputListener {
             mShaderGenerator->flushShaderCache();
         }
 
+        // Remove old Viewport if present
+        if (getRenderWindow()->hasViewportWithZOrder(0)) {
+            getRenderWindow()->removeViewport(0);
+        }
+
         _sceneManager = mRoot->createSceneManager();
         mShaderGenerator->addSceneManager(_sceneManager);
-
-        _sai->loadURL(file, _sceneManager->getRootSceneNode());
-        _sai->setWindow(getRenderWindow());
         _sceneManager->addRenderQueueListener(getOverlaySystem());
 
+        _sai->loadURL(file, _sceneManager->getRootSceneNode());
+
         auto cam =_sai->scene()->bound<X3D::Viewpoint>()->getCamera();
+        _sai->scene()->setViewport(getRenderWindow()->addViewport(cam));
+
         _controls.reset(new OgreBites::AdvancedRenderControls(_trays.get(),
                                                               cam));
         addInputListener(_controls.get());

@@ -12,6 +12,7 @@
 #include <World/Background.h>
 #include <Geometry/Shape.h>
 #include <World/WorldInfo.h>
+#include <World/Viewpoint.h>
 
 using namespace X3D;
 
@@ -36,6 +37,10 @@ void Scene::addChild(const std::shared_ptr<Node>& obj) {
 
 void Scene::setViewport(Ogre::Viewport* viewport) {
     _viewport = viewport;
+
+    if(bound<Viewpoint>()) {
+        bound<Viewpoint>()->onBound(*this); // reconfigure
+    }
 
     if(bound<Background>()) {
     	bound<Background>()->apply(_viewport);

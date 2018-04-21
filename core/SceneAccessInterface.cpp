@@ -184,20 +184,6 @@ Scene* SceneAccessInterface::scene()
     return scene.get();
 }
 
-void SceneAccessInterface::setWindow(Ogre::RenderWindow* window) {
-    // Remove old Viewport if present
-    if (window->hasViewportWithZOrder(0)) {
-    	window->removeViewport(0);
-    }
-
-    // By default create a viewport with full window size
-    auto _scene = scene();
-    auto vp = _scene->bound<Viewpoint>();
-    auto fullscreenViewport = window->addViewport(vp->getCamera());
-    _scene->setViewport(fullscreenViewport);
-	vp->onBound(*_scene); // notify of viewport
-}
-
 SceneAccessInterface::~SceneAccessInterface() {
     clearWorld();
 }

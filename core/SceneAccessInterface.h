@@ -59,12 +59,6 @@ public:
     SceneAccessInterface();
     ~SceneAccessInterface();
 
-    /**
-     * links active camera to the output window. must be called after world is initialized.
-     * @param window
-     */
-    void setWindow(Ogre::RenderWindow* window);
-
     void setNodeAttribute(const std::string& nodeName, const std::string& fieldName, const std::string& fieldValue, bool buffer = true);
 
     std::string getNodeAttribute(const std::string& nodeName, const std::string& fieldName);
