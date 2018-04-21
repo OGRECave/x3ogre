@@ -90,27 +90,13 @@ std::string SceneAccessInterface::getNodeAttribute(const std::string& nodeName, 
     return ti->callMemberString(obj, fieldName);
 }
 
-void SceneAccessInterface::clearWorld() {
-	if (scene()) {
-        // Reset World
-	    _rootNode->getUserObjectBindings().eraseUserAny("x3d_scene");
-
-		// Remove current basepath from FileSystem
-		Ogre::ResourceGroupManager::getSingleton().removeResourceLocation(_basePath, "X3D");
-        Ogre::ResourceGroupManager::getSingleton().unloadResourceGroup("X3D");
-	}
-}
-
 void SceneAccessInterface::loadURL(const std::string& url, Ogre::SceneNode* rootNode) {
 	// Reset values to default for reloading a second URL
-	if (init) {
-		clearWorld();
-		init = false;
+	if (!_basePath.empty()) {
+	    // Remove current basepath from ResourceGroupManager
+	    Ogre::ResourceGroupManager::getSingleton().removeResourceLocation(_basePath, "X3D");
+	    Ogre::ResourceGroupManager::getSingleton().unloadResourceGroup("X3D");
 	}
-
-    // RTSS has to be initialized before loading of the scripts
-    // 		but AFTER creation of the rendering Window
-    // 		Has to be implemented in the concrete viewer
 
     // add X3D path to Ogre resources
     Ogre::String filename, basepath;
@@ -127,21 +113,11 @@ void SceneAccessInterface::loadURL(const std::string& url, Ogre::SceneNode* root
     }
 #endif
 
-    _camTgt = Ogre::Vector3::ZERO;
-    _fileName = filename;
     _basePath = basepath;
     _rootNode = rootNode;
 
-    try {
-        auto stream = Ogre::ResourceGroupManager::getSingleton().openResource(filename, "X3D");
-        _x3dFM->load(stream, "X3D", _rootNode);
-        addEssentialNodes();
-    } catch (Ogre::Exception& e) {
-    	clearWorld();
-    	throw e;
-    }
-
-    init = true;
+    auto stream = Ogre::ResourceGroupManager::getSingleton().openResource(filename, "X3D");
+    _x3dFM->load(stream, "X3D", _rootNode);
 }
 
 void SceneAccessInterface::addEssentialNodes()
@@ -185,7 +161,6 @@ Scene* SceneAccessInterface::scene()
 }
 
 SceneAccessInterface::~SceneAccessInterface() {
-    clearWorld();
 }
 
 bool SceneAccessInterface::frameStarted(const Ogre::FrameEvent& evt) {
@@ -195,15 +170,6 @@ bool SceneAccessInterface::frameStarted(const Ogre::FrameEvent& evt) {
     }
     _updates.clear();
     _updateMutex.unlock();
-
-    /*
-     * Updates the SceneNodes which have been modified during update process.
-     * This is necessary because calling needUpdate() of a DEF-Transform during
-     * _update process sets the variable mParentNotified of the parents of the
-     * USE-Transform such that its true even if the node isn't inserted in its
-     * parents update process.
-     */
-    Ogre::Node::processQueuedUpdates();
 
     return true;
 }

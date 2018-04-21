@@ -13,16 +13,13 @@
 #include <mutex>
 #include <map>
 
-#include <OgreShaderGenerator.h>
 #include <OgreAxisAlignedBox.h>
-#include <OgreRenderWindow.h>
 #include <OgreFrameListener.h>
 
 #include <Parser/X3DFileManager.h>
 #include <World/Scene.h>
 
 #include <x3ogre_core_export.h>
-#include "World.h"
 
 namespace X3D {
 
@@ -34,10 +31,7 @@ namespace X3D {
  * http://www.web3d.org/documents/specifications/19775-2/V3.3/Part02/servRef.html
  */
 class X3OGRECORE_EXPORT SceneAccessInterface : public Ogre::FrameListener  {
-    bool init = false;
     Ogre::SceneNode* _rootNode = nullptr;
-
-    std::string _fileName;
     std::string _basePath;
 
     std::unique_ptr<X3DFileManager> _x3dFM;
@@ -47,14 +41,6 @@ class X3OGRECORE_EXPORT SceneAccessInterface : public Ogre::FrameListener  {
     // Updates associated by nodeAndField
     std::map<std::pair<std::string,std::string>,std::string> _updates;
     std::mutex _updateMutex;
-
-    /**
-     * Unloads current File and resets all necessary references to enable
-     * 	reloading a new file
-     */
-    void clearWorld();
-
-    Ogre::Vector3 _camTgt = Ogre::Vector3::ZERO;
 public:
     SceneAccessInterface();
     ~SceneAccessInterface();
@@ -70,6 +56,7 @@ public:
 
     Scene* scene();
 
+    /// listener needed to process buffered attribute events
     bool frameStarted(const Ogre::FrameEvent& evt);
 
     /**

@@ -97,7 +97,7 @@ struct X3Ogre : public OgreBites::ApplicationContext, OgreBites::InputListener {
         _sceneManager->addRenderQueueListener(getOverlaySystem());
 
         _sai->loadURL(file, _sceneManager->getRootSceneNode());
-
+        _sai->addEssentialNodes(); // ensure we have a X3D::Viewpoint
         auto cam =_sai->scene()->bound<X3D::Viewpoint>()->getCamera();
         _sai->scene()->setViewport(getRenderWindow()->addViewport(cam));
 
