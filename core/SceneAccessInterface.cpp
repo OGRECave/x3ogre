@@ -147,7 +147,7 @@ void SceneAccessInterface::loadURL(const std::string& url, Ogre::SceneNode* root
 void SceneAccessInterface::addEssentialNodes()
 {
     auto _scene = scene();
-    World world = {_rootNode->getCreator(), _scene};
+    World world = {_scene};
 
     auto vp = _scene->bound<Viewpoint>();
     if (not vp) {

@@ -7,7 +7,7 @@
 
 #include <Parser/X3DFileManager.h>
 #include <core/SceneAccessInterface.h>
-#include <World/Inline.h>
+#include <core/World.h>
 #include <World/Scene.h>
 #include <Parser/X3DParser.h>
 #include <iostream>
@@ -35,7 +35,7 @@ void X3DFileManager::load(Ogre::DataStreamPtr& stream,
         Ogre::LogManager::getSingleton().logMessage("error parsing '"+stream->getName()+": "+e.what(), Ogre::LML_CRITICAL);
     }
 
-    World world = {rootNode->getCreator(), scene.get()};
+    World world = {scene.get()};
     scene->initialise(world);
 }
 

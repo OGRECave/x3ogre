@@ -8,17 +8,15 @@
 #pragma once
 
 #include <OgreSceneManager.h>
+#include <World/Scene.h>
 
 namespace X3D {
-
-class Scene;
 
 /**
  * World is the starting class for building a Scene.
  * It contains the Root-Node and the SceneManager
  */
 struct World {
-    Ogre::SceneManager* const _sceneManager;
     Scene* const _scene;
 
     /**
@@ -26,7 +24,7 @@ struct World {
      * @return Ogre::SceneManager
      */
     Ogre::SceneManager* sceneManager() {
-        return _sceneManager;
+        return _scene->getSceneNode()->getCreator();
     }
 
     /**
