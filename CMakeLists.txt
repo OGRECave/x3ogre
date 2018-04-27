@@ -2,23 +2,22 @@ cmake_minimum_required (VERSION 2.8)
 
 project(x3ogre)
 
+set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
+
 include(GenerateExportHeader)
-add_compiler_export_flags()
 
 if(WIN32)
     # explanation: needed for M_PI etc, parallel compiling, target win8
     add_definitions(-D_USE_MATH_DEFINES -DMP -D_WIN32_WINNT=0x0602)
     add_definitions(-W2 -wd4305) # tame warnings
 else()
-    add_definitions(-std=c++11 -Wall -Wextra -Wcast-align -Wno-unused-parameter -Wno-overloaded-virtual)
+    add_definitions(-Wall -Wextra -Wcast-align -Wno-unused-parameter -Wno-overloaded-virtual)
 endif()
 
 # Find OGRE
-find_package(OGRE 1.10 QUIET REQUIRED)
-link_directories(${OGRE_LIBRARY_DIRS})
-
-# Specify OGRE Include DIRS
-include_directories(${OGRE_INCLUDE_DIRS})
+find_package(OGRE 1.11 QUIET REQUIRED)
  
 if(CMAKE_BUILD_TYPE STREQUAL "")
   set(CMAKE_BUILD_TYPE "Release" CACHE STRING "" FORCE)
@@ -36,22 +35,6 @@ add_custom_command(OUTPUT ${PROJECT_SOURCE_DIR}/reflection/db.cpp
     DEPENDS ${PROJECT_SOURCE_DIR}/reflection/db.cpp.in ${nodes_HDR}
     WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/reflection/)
 
-# X3DCore
-file(GLOB core_SRC
-    ${PROJECT_SOURCE_DIR}/core/*.cpp
-    ${PROJECT_SOURCE_DIR}/GeoShape/*.cpp
-    ${PROJECT_SOURCE_DIR}/Parser/*.cpp)
-    
-add_library(X3OgreCore ${core_SRC} 
-    ${PROJECT_SOURCE_DIR}/reflection/db.cpp
-    ${PROJECT_SOURCE_DIR}/reflection/TypeInfo.cpp)
-target_link_libraries(X3OgreCore ${OGRE_LIBRARIES})
-
-generate_export_header(X3OgreCore
-    EXPORT_FILE_NAME ${PROJECT_BINARY_DIR}/x3ogre_core_export.h)
-
-target_include_directories(X3OgreCore PUBLIC ${PROJECT_BINARY_DIR} ${PROJECT_SOURCE_DIR})
-
 # Nodes
 file(GLOB nodes_SRC
     ${PROJECT_SOURCE_DIR}/Animation/*.cpp
@@ -59,8 +42,25 @@ file(GLOB nodes_SRC
     ${PROJECT_SOURCE_DIR}/Geometry/*.cpp
     ${PROJECT_SOURCE_DIR}/World/*.cpp)
 
-add_library(X3DNodes ${nodes_SRC})
-target_link_libraries(X3DNodes X3OgreCore)
+# Core/ Plugin
+file(GLOB core_SRC
+    ${PROJECT_SOURCE_DIR}/core/*.cpp
+    ${PROJECT_SOURCE_DIR}/GeoShape/*.cpp
+    ${PROJECT_SOURCE_DIR}/Parser/*.cpp)
+    
+add_library(Plugin_X3DLoader SHARED 
+    ${core_SRC} ${nodes_SRC}
+    ${PROJECT_SOURCE_DIR}/reflection/db.cpp
+    ${PROJECT_SOURCE_DIR}/reflection/TypeInfo.cpp)
+target_link_libraries(Plugin_X3DLoader OgreMain OgreRTShaderSystem)
+set_target_properties(Plugin_X3DLoader PROPERTIES PREFIX "")
+
+generate_export_header(Plugin_X3DLoader
+    EXPORT_FILE_NAME ${PROJECT_BINARY_DIR}/x3ogre_core_export.h
+    BASE_NAME X3OGRECORE)
+
+target_include_directories(Plugin_X3DLoader PUBLIC ${PROJECT_BINARY_DIR} ${PROJECT_SOURCE_DIR})
+
 
 set(MEDIA_DIR ${CMAKE_BINARY_DIR}/x3ogre_media/)
 # RTSS data
@@ -109,11 +109,10 @@ if(EMSCRIPTEN)
     # debugging
     # set(CMAKE_EXE_LINKER_FLAGS "-O0 -g -s ASSERTIONS=2 -s DEMANGLE_SUPPORT=1 -s DISABLE_EXCEPTION_CATCHING=0 -s EXCEPTION_DEBUG=1 ${CMAKE_EXE_LINKER_FLAGS}")
     set(CMAKE_EXECUTABLE_SUFFIX ".html")
-    list(APPEND OGRE_LIBRARIES freetype zzip z)
 
     set(OGRE_MEDIA_DIR "")
     configure_file(${PROJECT_SOURCE_DIR}/templates/resources.cfg.in ${MEDIA_DIR}/resources.cfg)
 endif()
 
 add_executable(x3ogre apps/viewer.cpp)
-target_link_libraries(x3ogre X3OgreCore X3DNodes)
+target_link_libraries(x3ogre OgreBites Plugin_X3DLoader)
