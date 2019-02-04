@@ -49,7 +49,7 @@ struct X3Ogre : public OgreBites::ApplicationContext, OgreBites::InputListener {
 
     Ogre::SceneManager* _sceneManager = nullptr;
 
-    X3Ogre() : OgreBites::ApplicationContext("x3ogre", false) {
+    X3Ogre() : OgreBites::ApplicationContext("x3ogre") {
         initApp();
     }
 
