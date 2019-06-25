@@ -83,7 +83,7 @@ template <> void parse(const string& str, float& v) {
 template <> void parse(const string& str, Ogre::Quaternion& v) {
     Ogre::Vector4 tmp = Ogre::StringConverter::parseVector4(str);
     v = Ogre::Quaternion(Ogre::Radian(tmp[3]), Ogre::Vector3(tmp.ptr()));
-    assert(abs(Ogre::Vector3(tmp.ptr()).length() - 1.0) < numeric_limits<float>::epsilon());
+    assert(abs(Ogre::Vector3(tmp.ptr()).length() - 1.0) < 1e-3);
 }
 
 // parse definition for vectors values
