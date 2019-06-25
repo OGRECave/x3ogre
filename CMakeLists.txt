@@ -18,7 +18,7 @@ endif()
 
 # Find OGRE
 find_package(OGRE 1.11 QUIET REQUIRED)
- 
+
 find_package(pugixml QUIET)
  
 if(CMAKE_BUILD_TYPE STREQUAL "")
@@ -66,10 +66,10 @@ target_include_directories(Plugin_X3DLoader PUBLIC ${PROJECT_BINARY_DIR} ${PROJE
 
 set(MEDIA_DIR ${CMAKE_BINARY_DIR}/x3ogre_media/)
 # RTSS data
-file(COPY 
-    "${OGRE_MEDIA_DIR}/RTShaderLib/GLSL"
-    "${OGRE_MEDIA_DIR}/RTShaderLib/GLSLES"
-    DESTINATION "${MEDIA_DIR}/RTShaderLib/")
+file(COPY "${OGRE_MEDIA_DIR}/RTShaderLib/GLSL" DESTINATION "${MEDIA_DIR}/RTShaderLib/")
+if(${OGRE_VERSION} VERSION_LESS 1.12.0)
+    file(COPY "${OGRE_MEDIA_DIR}/RTShaderLib/GLSLES" DESTINATION "${MEDIA_DIR}/RTShaderLib/")
+endif()
 
 # SDK Tray data
 file(COPY
