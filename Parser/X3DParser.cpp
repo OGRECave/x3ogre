@@ -26,11 +26,11 @@
 
 using namespace X3D;
 
-void X3DParser::recurse(rapidxml::xml_node<>* n, StackNode& parent) {
+void X3DParser::recurse(const pugi::xml_node& n, StackNode& parent) {
     StackNode node = parseNode(n, parent);
 
     // DFS traversal of Tree
-    for(auto c = n->first_node(); c; c = c->next_sibling()) {
+    for(auto c : n.children()) {
         recurse(c, node);
     }
 }
@@ -38,22 +38,20 @@ void X3DParser::recurse(rapidxml::xml_node<>* n, StackNode& parent) {
 X3DParser::X3DParser(std::string xml, Node& parent, Scene& scene, const std::string& nameSpace) :
 _scene(scene), _nameSpace(nameSpace)
 {
-    const int flags = rapidxml::parse_validate_closing_tags | rapidxml::parse_no_data_nodes;
-
-    rapidxml::xml_document<> doc;
-    doc.parse<flags>(&xml[0]);
+    pugi::xml_document doc;
+    doc.load_buffer_inplace(&xml[0], xml.size());
 
     reflection::alias("Route", "ROUTE");
 
     StackNode root{"X3DParser::parent", reflection::getTypeInfo(parent), &parent};
 
-    recurse(doc.first_node(), root);
+    recurse(doc.document_element(), root);
 }
 
 // functions for building the scene graph
-StackNode X3DParser::parseNode(rapidxml::xml_node<>* xmlnode, StackNode& parent) {
+StackNode X3DParser::parseNode(const pugi::xml_node& xmlnode, StackNode& parent) {
     StackNode node;
-    node.tag = xmlnode->name();
+    node.tag = xmlnode.name();
 
     if (stricmp(node.tag, "x3d") == 0) {
         // x3d has no counterpart in our scenegraph, so just skip it
@@ -120,10 +118,10 @@ std::string X3DParser::resolveNamespace(const std::string& name) {
     return qualifiedName;
 }
 
-void X3DParser::resolveDefUse(std::shared_ptr<Node>& object, rapidxml::xml_node<>* node) {
-    for(auto a = node->first_attribute(); a; a = a->next_attribute()) {
-        const char* name = a->name();
-        const char* value = a->value();
+void X3DParser::resolveDefUse(std::shared_ptr<Node>& object, const pugi::xml_node& node) {
+    for(auto a : node.attributes()) {
+        const char* name = a.name();
+        const char* value = a.value();
 
         if (stricmp(name, "use") == 0) {
             // make object point to previous instance. destroys temporary object.
@@ -140,10 +138,10 @@ void X3DParser::resolveDefUse(std::shared_ptr<Node>& object, rapidxml::xml_node<
     }
 }
 
-void X3DParser::parseAttributes(rapidxml::xml_node<>* node, Node* object, reflection::TypeInfoCommon* ti) {
-    for(auto a = node->first_attribute(); a; a = a->next_attribute()) {
-        const char* name = a->name();
-        const char* value = a->value();
+void X3DParser::parseAttributes(const pugi::xml_node& node, Node* object, reflection::TypeInfoCommon* ti) {
+    for(auto a : node.attributes()) {
+        const char* name = a.name();
+        const char* value = a.value();
 
         if (stricmp(name, "def") == 0 or strcmp(name, "id") == 0 or stricmp(name, "use") == 0) {
             continue;
@@ -152,7 +150,7 @@ void X3DParser::parseAttributes(rapidxml::xml_node<>* node, Node* object, reflec
         try {
             ti->callMember(object, name, value);
         } catch (std::runtime_error& e) {
-            Ogre::LogManager::getSingleton().logMessage(std::string(node->name())+": "+e.what(), Ogre::LML_NORMAL);
+            Ogre::LogManager::getSingleton().logMessage(std::string(name)+": "+e.what(), Ogre::LML_NORMAL);
         }
     }
 }

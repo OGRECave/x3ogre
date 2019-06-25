@@ -19,6 +19,8 @@ endif()
 # Find OGRE
 find_package(OGRE 1.11 QUIET REQUIRED)
  
+find_package(pugixml QUIET)
+ 
 if(CMAKE_BUILD_TYPE STREQUAL "")
   set(CMAKE_BUILD_TYPE "Release" CACHE STRING "" FORCE)
 endif(CMAKE_BUILD_TYPE STREQUAL "")
@@ -52,7 +54,7 @@ add_library(Plugin_X3DLoader SHARED
     ${core_SRC} ${nodes_SRC}
     ${PROJECT_SOURCE_DIR}/reflection/db.cpp
     ${PROJECT_SOURCE_DIR}/reflection/TypeInfo.cpp)
-target_link_libraries(Plugin_X3DLoader OgreMain OgreRTShaderSystem)
+target_link_libraries(Plugin_X3DLoader OgreMain OgreRTShaderSystem pugixml)
 set_target_properties(Plugin_X3DLoader PROPERTIES PREFIX "")
 
 generate_export_header(Plugin_X3DLoader

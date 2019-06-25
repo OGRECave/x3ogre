@@ -15,7 +15,7 @@
 #include <reflection/db.h>
 
 #include <cstddef>
-#include <Parser/rapidxml.hpp>
+#include <pugixml.hpp>
 
 namespace X3D
 {
@@ -30,13 +30,13 @@ class X3DParser {
 	Scene& _scene;
 	std::string _nameSpace;
 
-	void recurse(rapidxml::xml_node<>* n, StackNode& parent);
+	void recurse(const pugi::xml_node& n, StackNode& parent);
 
-    StackNode parseNode(rapidxml::xml_node<>* node, StackNode& parent);
+    StackNode parseNode(const pugi::xml_node& node, StackNode& parent);
 
     std::string resolveNamespace(const std::string& name);
-    void resolveDefUse(std::shared_ptr<Node>& object, rapidxml::xml_node<>* node);
-    void parseAttributes(rapidxml::xml_node<>* node, Node* object, reflection::TypeInfoCommon* ti);
+    void resolveDefUse(std::shared_ptr<Node>& object, const pugi::xml_node& node);
+    void parseAttributes(const pugi::xml_node& node, Node* object, reflection::TypeInfoCommon* ti);
 public:
 	X3DParser(std::string xml, Node& parent, Scene& scene, const std::string& nameSpace = "");
 };
