@@ -50,7 +50,7 @@ void Route::apply(const Scene& scene, const std::string& nameSpace) const {
         ti->memberByArgType(from.get()); // throws if member unsupported
         ti->callMember(to, _toField, from);
     } catch(std::exception& e) {
-        Ogre::LogManager::getSingleton().logMessage("could not apply Route to Field '"+ _toNode + "." + _toField + "': "  + e.what(), Ogre::LML_NORMAL);
+        Ogre::LogManager::getSingleton().logError("could not apply Route to Field '"+ _toNode + "." + _toField + "': "  + e.what());
     }
 }
 

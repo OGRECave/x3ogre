@@ -53,12 +53,12 @@ StackNode X3DParser::parseNode(const pugi::xml_node& xmlnode, StackNode& parent)
     StackNode node;
     node.tag = xmlnode.name();
 
-    if (stricmp(node.tag, "x3d") == 0) {
+    if (Ogre::StringUtil::endsWith(node.tag, "x3d")) {
         // x3d has no counterpart in our scenegraph, so just skip it
         return parent;
     }
 
-    if (stricmp(node.tag, "scene") == 0) {
+    if (Ogre::StringUtil::endsWith(node.tag, "scene")) {
         // we create the Scene node from outside
         return parent;
     }
@@ -68,7 +68,7 @@ StackNode X3DParser::parseNode(const pugi::xml_node& xmlnode, StackNode& parent)
     node.ti = reflection::getTypeInfo(node.tag);
 
     if (not node.ti) {
-        Ogre::LogManager::getSingleton().logMessage("no such node: '" + std::string(node.tag) + "'", Ogre::LML_NORMAL);
+        Ogre::LogManager::getSingleton().logError("no such node: '" + std::string(node.tag) + "'");
         return node;
     }
 
@@ -99,7 +99,7 @@ StackNode X3DParser::parseNode(const pugi::xml_node& xmlnode, StackNode& parent)
         //std::cout << parent->tag << "::" << member << "(" << tag << ")" <<  std::endl;
         parent.ti->callMember(parent.object, member, sharedNode);
     } catch (std::runtime_error& e) {
-        Ogre::LogManager::getSingleton().logMessage(std::string(parent.tag) + "::*(" + node.tag + "): " + e.what(), Ogre::LML_NORMAL);
+        Ogre::LogManager::getSingleton().logError(std::string(parent.tag) + "::*(" + node.tag + "): " + e.what());
     }
 
     parseAttributes(xmlnode, node.object, node.ti);
@@ -123,13 +123,13 @@ void X3DParser::resolveDefUse(std::shared_ptr<Node>& object, const pugi::xml_nod
         const char* name = a.name();
         const char* value = a.value();
 
-        if (stricmp(name, "use") == 0) {
+        if (Ogre::StringUtil::endsWith("use", name)) {
             // make object point to previous instance. destroys temporary object.
             object = _scene._shareNode(resolveNamespace(value));
             break;
         }
 
-        if (stricmp(name, "def") == 0 or strcmp(name, "id") == 0) {
+        if (Ogre::StringUtil::endsWith("def", name) || Ogre::StringUtil::endsWith("id", name)) {
             std::string qualifiedName = resolveNamespace(value);
             _scene.registerNode(object, qualifiedName);
             object->id(qualifiedName);
@@ -143,14 +143,14 @@ void X3DParser::parseAttributes(const pugi::xml_node& node, Node* object, reflec
         const char* name = a.name();
         const char* value = a.value();
 
-        if (stricmp(name, "def") == 0 or strcmp(name, "id") == 0 or stricmp(name, "use") == 0) {
+        if (Ogre::StringUtil::endsWith("def", name) || Ogre::StringUtil::endsWith("id", name) || Ogre::StringUtil::endsWith("use", name)) {
             continue;
         }
 
         try {
             ti->callMember(object, name, value);
         } catch (std::runtime_error& e) {
-            Ogre::LogManager::getSingleton().logMessage(std::string(name)+": "+e.what(), Ogre::LML_NORMAL);
+            Ogre::LogManager::getSingleton().logError(std::string(name)+": "+e.what());
         }
     }
 }

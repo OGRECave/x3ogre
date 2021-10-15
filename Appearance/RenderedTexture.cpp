@@ -68,7 +68,7 @@ void RenderedTexture::update(const std::string& update) {
 	_update = update;
 
 	if (_world && _rttViewport) {
-		if (stricmp(_update.c_str(), "always") == 0) {
+		if (Ogre::StringUtil::endsWith(_update, "always")) {
 			_renderTexture->setAutoUpdated(true);
 			_rttViewport->setAutoUpdated(true);
 		} else {

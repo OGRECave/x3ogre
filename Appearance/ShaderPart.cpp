@@ -45,11 +45,11 @@ void ShaderPart::init(const std::string& language) {
 	_language = language;
 
 	// Determine GpuProgramType
-	if (stricmp(_type.c_str(), "fragment") == 0) {
+	if (Ogre::StringUtil::endsWith(_type, "fragment")) {
 		_programType = Ogre::GpuProgramType::GPT_FRAGMENT_PROGRAM;
-	} else if (stricmp(_type.c_str(), "vertex") == 0) {
+	} else if (Ogre::StringUtil::endsWith(_type, "vertex")) {
 		_programType = Ogre::GpuProgramType::GPT_VERTEX_PROGRAM;
-	} else if (stricmp(_type.c_str(), "compute") == 0) {
+	} else if (Ogre::StringUtil::endsWith(_type, "compute")) {
 		_programType = Ogre::GpuProgramType::GPT_COMPUTE_PROGRAM;
 	} else {
 		// If the ShaderType is not Specified: Throw Exception

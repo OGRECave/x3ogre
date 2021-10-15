@@ -35,20 +35,20 @@ void Field::apply(Ogre::GpuProgramParameters* params) {
 		return;
 	}
 
-	if (stricmp(_type.c_str(), "sfint32") == 0) {
+	if (Ogre::StringUtil::endsWith(_type, "sfint32")) {
 		int i;
 		Ogre::StringConverter::parse(_value,i);
 		params->setNamedConstant(_name, i);
-	} else if (stricmp(_type.c_str(), "sffloat") == 0){
+	} else if (Ogre::StringUtil::endsWith(_type, "sffloat")){
 		float f;
 		Ogre::StringConverter::parse(_value,f);
 		params->setNamedConstant(_name, f);
-	} else if (stricmp(_type.c_str(), "sfvec3f") == 0){
+	} else if (Ogre::StringUtil::endsWith(_type, "sfvec3f")){
 		Ogre::Vector3 vec3f;
 		Ogre::StringConverter::parse(_value,vec3f);
 		params->setNamedConstant(_name, vec3f);
 	} else {
-	    Ogre::LogManager::getSingleton().logMessage("Field Node '"+_name+"': type '"+_type+"' is not implemented", Ogre::LML_NORMAL);
+	    Ogre::LogManager::getSingleton().logError("Field Node '"+_name+"': type '"+_type+"' is not implemented");
 	}
 
 }

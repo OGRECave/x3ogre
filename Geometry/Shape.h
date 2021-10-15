@@ -11,6 +11,7 @@
 
 #include <core/Node.h>
 #include <OgreSceneNode.h>
+#include <OgreResource.h>
 
 namespace X3D {
 class Appearance;

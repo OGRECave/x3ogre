@@ -49,9 +49,7 @@ Ogre::AxisAlignedBox getWorldBoundingBox(Ogre::SceneNode* node, Ogre::SceneNode*
         node->_updateBounds();
         bbox.merge(node->_getWorldAABB());
 
-        Ogre::SceneNode::ChildNodeIterator j = node->getChildIterator();
-        while (j.hasMoreElements()) {
-            auto nextNode = j.getNext();
+        for (auto nextNode : node->getChildren()) {
             // Add Child Node only if it isn't marked as leftOut
             if (nextNode != leftOut) {
                 nodes.push_back(static_cast<Ogre::SceneNode*>(nextNode));

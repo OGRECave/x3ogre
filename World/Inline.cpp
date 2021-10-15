@@ -17,7 +17,6 @@
 #include <World/WorldInfo.h>
 #include <World/Transform.h>
 
-#include <OgreSceneLoaderManager.h>
 #include <core/SceneLoader.h>
 
 using namespace X3D;
@@ -42,7 +41,7 @@ const std::string Inline::nameSpace() {
 void Inline::initialise(World& world) {
     if (_load) {
         auto stream = Ogre::ResourceGroupManager::getSingleton().openResource(_url, "X3D");
-        SceneLoader* fm = dynamic_cast<SceneLoader*>(Ogre::SceneLoaderManager::getSingleton()._getSceneLoader("X3D"));
+        SceneLoader* fm = dynamic_cast<SceneLoader*>(Ogre::Codec::getCodec("x3d"));
         fm->load(stream, "X3D", _groupParent, nameSpace());
     }
 }

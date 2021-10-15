@@ -11,13 +11,12 @@
 #include <Parser/X3DParser.h>
 #include <iostream>
 #include <OgreLogManager.h>
-#include <OgreSceneLoaderManager.h>
 
 using namespace X3D;
 
-void SceneLoader::load(Ogre::DataStreamPtr& stream,
+void SceneLoader::load(const Ogre::DataStreamPtr& stream,
                           const Ogre::String& groupName,
-                          Ogre::SceneNode* rootNode, const Ogre::String& nameSpace) {
+                          Ogre::SceneNode* rootNode, const Ogre::String& nameSpace) const {
     auto scene = std::make_shared<Scene>();
     scene->attachTo(rootNode);
     rootNode->getUserObjectBindings().setUserAny("x3d_scene", Ogre::Any(scene));
@@ -29,7 +28,7 @@ void SceneLoader::load(Ogre::DataStreamPtr& stream,
         Ogre::LogManager::getSingleton().logMessage("X3DFileManager::load: '"+stream->getName()+"'", Ogre::LML_TRIVIAL);
         X3DParser parser(xml, *scene, *scene, nameSpace);
     } catch (std::exception &e) {
-        Ogre::LogManager::getSingleton().logMessage("error parsing '"+stream->getName()+": "+e.what(), Ogre::LML_CRITICAL);
+        Ogre::LogManager::getSingleton().logError("parsing '"+stream->getName()+": "+e.what());
     }
 
     World world = {scene.get()};
@@ -37,9 +36,14 @@ void SceneLoader::load(Ogre::DataStreamPtr& stream,
 }
 
 SceneLoader::SceneLoader() {
-    Ogre::SceneLoaderManager::getSingleton().registerSceneLoader("X3D", {".x3d"}, this);
+    if(auto other = Ogre::Codec::getCodec("x3d"))
+    {
+        Ogre::Codec::unregisterCodec(other);
+        Ogre::LogManager::getSingleton().logWarning("unregistering previous codec for loading X3D");
+    }
+    Ogre::Codec::registerCodec(this);
 }
 
 SceneLoader::~SceneLoader() {
-    Ogre::SceneLoaderManager::getSingleton().unregisterSceneLoader("X3D");
+    Ogre::Codec::unregisterCodec(this);
 }

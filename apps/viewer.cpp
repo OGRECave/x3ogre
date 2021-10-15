@@ -8,7 +8,6 @@
 #include <OgreTrays.h>
 #include <OgreAdvancedRenderControls.h>
 #include <OgreCameraMan.h>
-#include <OgreSceneLoaderManager.h>
 
 #include <World/Viewpoint.h>
 
@@ -30,14 +29,12 @@ namespace {
 void printSceneGraph(Ogre::SceneNode* node, const std::string& tabs = "") {
     std::cout << tabs << node->getName() << std::endl;
 
-    Ogre::SceneNode::ObjectIterator mo = node->getAttachedObjectIterator();
-    while(mo.hasMoreElements()) {
-        std::cout << tabs+"\t" << mo.getNext()->getName() << std::endl;
+    for(auto mo : node->getAttachedObjects()) {
+        std::cout << tabs+"\t" << mo->getName() << std::endl;
     }
 
-    Ogre::SceneNode::ChildNodeIterator j = node->getChildIterator();
-    while(j.hasMoreElements()) {
-        printSceneGraph(static_cast<Ogre::SceneNode*>(j.getNext()), tabs+"\t");
+    for(auto n : node->getChildren()) {
+        printSceneGraph(static_cast<Ogre::SceneNode*>(n), tabs+"\t");
     }
 }
 
@@ -75,12 +72,9 @@ struct X3Ogre : public OgreBites::ApplicationContext, OgreBites::InputListener {
         Ogre::String filename, basepath;
         Ogre::StringUtil::splitFilename(file, filename, basepath);
 
-        if (!basepath.empty() && !Ogre::ResourceGroupManager::getSingleton().resourceLocationExists(basepath, "X3D"))
-        {
-            // Counts for android, since APK located files (crash if basepath is empty)
-            Ogre::ResourceGroupManager::getSingleton().addResourceLocation(basepath, "FileSystem", "X3D", true);
-            Ogre::ResourceGroupManager::getSingleton().initialiseResourceGroup("X3D");
-        }
+        Ogre::ResourceGroupManager::getSingleton().addResourceLocation(basepath, "FileSystem", "X3D", true);
+        Ogre::ResourceGroupManager::getSingleton().initialiseResourceGroup("X3D");
+        Ogre::ResourceGroupManager::getSingleton().setWorldResourceGroupName("X3D");
 
         if(_controls) {
             removeInputListener(_controls.get());
@@ -109,7 +103,7 @@ struct X3Ogre : public OgreBites::ApplicationContext, OgreBites::InputListener {
         mShaderGenerator->addSceneManager(_sceneManager);
         _sceneManager->addRenderQueueListener(getOverlaySystem());
 
-        Ogre::SceneLoaderManager::getSingleton().load(filename, "X3D", _sceneManager->getRootSceneNode());
+        _sceneManager->getRootSceneNode()->loadChildren(filename);
 
         // SAI init
         _sai.reset(new X3D::SceneAccessInterface(_sceneManager->getRootSceneNode()));

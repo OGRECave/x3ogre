@@ -8,6 +8,7 @@
 #include "StringConverter.h"
 #include <cstdlib>
 #include <memory>
+#include <sstream>
 
 #include <core/Node.h>
 

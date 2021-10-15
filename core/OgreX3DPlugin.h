@@ -9,7 +9,6 @@
 #define CORE_OGREX3DPLUGIN_H_
 
 #include "OgrePlugin.h"
-#include "OgreSceneLoader.h"
 
 namespace X3D
 {
@@ -23,7 +22,7 @@ class OgreX3DPlugin : public Ogre::Plugin
     void shutdown();
     void uninstall() {}
 protected:
-    Ogre::SceneLoader* mX3DSceneLoader;
+    Ogre::Codec* mX3DSceneLoader;
 };
 
 } /* namespace X3D */

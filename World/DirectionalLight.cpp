@@ -71,12 +71,11 @@ void DirectionalLight::initialise(World& world) {
     _init = true;
 
 	_light = world.sceneManager()->createLight();
-
 	_light->setType(Ogre::Light::LT_DIRECTIONAL);
-	_light->setDirection(_direction);
 
 	if(_parent) {
 	    _parent->attachObject(_light);
+		_parent->setDirection(_direction);
 	}
 
 	// Light is always present but maybe is off (_headLight==false)

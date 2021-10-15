@@ -17,7 +17,7 @@ else()
 endif()
 
 # Find OGRE
-find_package(OGRE 1.11 QUIET REQUIRED)
+find_package(OGRE QUIET REQUIRED CONFIG)
 
 find_package(pugixml QUIET)
  

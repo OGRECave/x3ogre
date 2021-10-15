@@ -11,24 +11,30 @@
 #include <OgreString.h>
 #include <OgreSingleton.h>
 #include <OgreSceneNode.h>
-#include <OgreSceneLoader.h>
+#include <OgreCodec.h>
+#include <OgreResourceGroupManager.h>
 
 namespace X3D
 {
 
-class SceneLoader : public Ogre::SceneLoader
+class SceneLoader : public Ogre::Codec
 {
 public:
     SceneLoader();
     ~SceneLoader();
 
-    void load(Ogre::DataStreamPtr& stream, const Ogre::String& groupName,
-              Ogre::SceneNode* rootNode) override {
-        load(stream, groupName, rootNode, "");
+    Ogre::String magicNumberToFileExt(const char* magicNumberPtr, size_t maxbytes) const override { return ""; }
+    Ogre::String getType() const override { return "x3d"; }
+
+    void decode(const Ogre::DataStreamPtr& input, const Ogre::Any& output) const override
+    {
+        auto groupName = Ogre::ResourceGroupManager::getSingleton().getWorldResourceGroupName();
+        auto rootNode = Ogre::any_cast<Ogre::SceneNode*>(output);
+        load(input, groupName, rootNode, "");
     }
 
-    void load(Ogre::DataStreamPtr& stream, const Ogre::String& groupName,
-            Ogre::SceneNode* rootNode, const Ogre::String& nameSpace);
+    void load(const Ogre::DataStreamPtr& stream, const Ogre::String& groupName,
+            Ogre::SceneNode* rootNode, const Ogre::String& nameSpace) const;
 };
 
 }
