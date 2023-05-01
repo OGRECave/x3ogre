@@ -8,6 +8,7 @@
 #include <OgreTrays.h>
 #include <OgreAdvancedRenderControls.h>
 #include <OgreCameraMan.h>
+#include <OgreShaderGenerator.h>
 
 #include <World/Viewpoint.h>
 
@@ -125,6 +126,11 @@ struct X3Ogre : public OgreBites::ApplicationContext, OgreBites::InputListener {
     void setup() override {
         // Ogre setup
         OgreBites::ApplicationContext::setup();
+
+#if OGRE_MIN_VERSION(14, 0, 0)
+        // X3D assumes two sided lighting
+        Ogre::RTShader::ShaderGenerator::getSingleton().getRenderState(Ogre::MSN_SHADERGEN)->getSubRenderState(Ogre::RTShader::SRS_PER_PIXEL_LIGHTING)->setParameter("two_sided", "true");
+#endif
 
         _trays.reset(new OgreBites::TrayManager("Interface", getRenderWindow()));
         addInputListener(_trays.get());
